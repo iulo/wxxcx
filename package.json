@@ -1,6 +1,6 @@
 {
   "name": "weixin-xcx",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "微信小程序框架扩展",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

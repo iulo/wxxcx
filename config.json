@@ -1,12 +1,10 @@
 {
 	"build": {
-		// 微信开发者工具注入文件
-		//"inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/components/sidebar/sidebar.js",
-		// 微信开发者工具注入方法
-		//"inject-function": "handleCompile"
 		// 开发环境编译时注入文件
-		"build-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/webapp/commit/build.js",
+		"build-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/weapp/commit/build.js",
+		// js文件需要修改文件遍历以及请求时的编译转换两个地方
+		"build-js-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/weapp/utils/projectManager.js",
 		// 发布、预览编译时注入文件
-		"publish-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/webapp/trans/transManager.js"
+		"publish-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/weapp/trans/transManager.js"
 	}
 }
