@@ -1,0 +1,8 @@
+{
+	"build": {
+		// 微信开发者工具注入文件
+		"inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/components/sidebar/sidebar.js",
+		// 微信开发者工具注入方法
+		"inject-function": "handleCompile"
+	}
+}

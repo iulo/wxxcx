@@ -1,0 +1,26 @@
+{
+  "name": "wxxcx",
+  "version": "0.1.0",
+  "description": "微信小程序框架扩展",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:undefinedlee/wxxcx.git"
+  },
+  "author": "emianbao@vip.qq.com",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.7.6",
+    "babel-plugin-syntax-jsx": "^6.13.0",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "glob": "^7.0.5",
+    "prompt": "^1.0.0"
+  },
+  "bin": {
+    "wxxcx": "bin/cli.js"
+  },
+  "babel": {}
+}
