@@ -52,13 +52,14 @@ function extendComponents(page, components){
 						});
 						var _eventName = events[eventName];
 						if(_eventName){
-							if(this[_eventName]){
-								this[_eventName].call(this, {
-									instanceName: instanceName,
-									eventName: eventName,
-									data: params
-								});
-							}
+								// 事件处理函数需要Page级的this
+								setTimeout(function(){
+									this[_eventName].call(this, {
+										instanceName: instanceName,
+										eventName: eventName,
+										data: params
+									});
+								}.bind(this), 1);
 						}
 					};
 					temp.setTimeout = this.setTimeout;
@@ -133,7 +134,7 @@ function extendComponents(page, components){
 	return componentHash;
 }
 
-module.exports = {
+var overwrite = {
 	require: function(require, __dirname){
 		return function(url){
 			if(!/\.[a-z]+$/.test(url)){
@@ -172,7 +173,6 @@ module.exports = {
 			DataCenter.on(keys, listener);
 		};
 
-		var isFirst = true;
 		// onLoad
 		var onLoad = config.onLoad;
 		config.onLoad = function(options){
@@ -181,26 +181,29 @@ module.exports = {
 			var params = PageEvents.getParams(this._eventId);
 			options = Object.assign(options, params);
 
-			if(isFirst){
-				isFirst = false;
-				Object.keys(this.components).forEach(function(instanceName){
-					var component = this.components[instanceName];
-					var fn;
-					for(var key in component){
-						fn = component[key];
-						if(typeof fn === "function"){
-							component[key] = fn.bind(this);
-						}
-					}
-					Object.defineProperties(component, {
-						data: {
-							get: function(){
-								return this.data[instanceName];
-							}.bind(this)
-						}
-					});
-				}.bind(this));
+			this.components = {};
+			// 混入组件
+			if(components){
+				this.components = extendComponents(this, components);
 			}
+
+			Object.keys(this.components).forEach(function(instanceName){
+				var component = this.components[instanceName];
+				var fn;
+				for(var key in component){
+					fn = component[key];
+					if(typeof fn === "function"){
+						component[key] = fn.bind(this);
+					}
+				}
+				Object.defineProperties(component, {
+					data: {
+						get: function(){
+							return this.data[instanceName];
+						}.bind(this)
+					}
+				});
+			}.bind(this));
 			
 			onLoad && onLoad.call(this, options);
 			Object.keys(this.components).forEach(function(instanceName){
@@ -273,12 +276,64 @@ module.exports = {
 			PageEvents.fire(this._eventId, eventName, params);
 		};
 
-		config.components = {};
-		// 混入组件
-		if(components){
-			config.components = extendComponents(config, components);
+		// 基础组件数据容器
+		config.data.__baseComponent__ = {};
+
+		// alert组件
+		config.data.__baseComponent__.alert = {
+			title: "",
+			content: "",
+			confirmText: "确定",
+			cancelText: "取消",
+			hidden: true,
+			noCancel: true,
+			bindconfirm: "__alert_confirm_handler__",
+			bindcancel: "__alert_cancel_handler__"
+		};
+		config.__alert_confirm_handler__ = function(){
+			this.setData({
+				"__baseComponent__.alert.hidden": true
+			});
+		}
+		config.__alert_cancel_handler__ = function(){
+			this.setData({
+				"__baseComponent__.alert.hidden": true
+			});
 		}
 
 		Page(config);
+	},
+	alert: function(config){
+		var changeData = {
+			"__baseComponent__.alert.hidden": false
+		};
+
+		if(typeof config === "string"){
+			changeData["__baseComponent__.alert.content"] = config;
+		}else{
+			var canConfigKeys = ["title", "content", "confirmText", "cancelText", "noCancel"];
+			for(var key in config){
+				if(canConfigKeys.indexOf(key) !== -1){
+					changeData["__baseComponent__.alert." + key] = config[key];
+				}
+			}
+		}
+
+		getApp().getCurrentPage().setData(changeData);
 	}
 };
+
+module.exports = overwrite;
+
+// 设置全局Alert
+// Function.constructor.__proto__._apply = Function.constructor.__proto__.apply;
+// Function.constructor.__proto__.apply = function(target, params){
+// 	if(params[1] === "console.warn('can not create Function')"){
+// 		return this._apply(target, [params[0]]);
+// 	}else{
+// 		return this._apply(target, params);
+// 	}
+// };
+
+// var window = new Function("return this", "")();
+// window.Alert = overwrite.Alert = overwrite.alert;

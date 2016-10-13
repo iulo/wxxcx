@@ -23,6 +23,8 @@ function transPageUrl(url, __dirname, pagedir){
 	return url + params;
 }
 
+var Undefined = (function(){})();
+
 var API = {
 	request: wx.request,
 	File: {
@@ -71,6 +73,13 @@ var API = {
 		setSync: wx.setStorageSync,
 		get: wx.getStorage,
 		getSync: wx.getStorageSync,
+		remove: function(options){
+			options.data = Undefined;
+			this.set(options);
+		},
+		removeSync: function(key){
+			this.setSync(key, Undefined);
+		},
 		clear: wx.clearStorage,
 		clearSync: wx.clearStorageSync
 	},
@@ -140,9 +149,18 @@ module.exports = function(__dirname){
 		redirectTo: function(options){
 			options.url = transPageUrl(options.url, __dirname, path.dirname(getApp().getCurrentPage().__route__));
 
-			var event = PageEvents.register();
+			var event = PageEvents.register(null, options.params);
 
+			delete options.params;
+			
 			options.url += (options.url.indexOf("?") === -1 ? "?" : "&") + "_eventId=" + event.eventId;
+
+			// 页面重定向后，针对当前页面的所有事件监听全部转移到新跳转的页面
+			var events = PageEvents.events;
+			var currentEvent = events[getApp().getCurrentPage()._eventId];
+			if(currentEvent){
+				events[event.eventId].listeners = currentEvent.listeners;
+			}
 
 			wx.redirectTo(options);
 

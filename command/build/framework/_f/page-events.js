@@ -1,11 +1,12 @@
 var registerId = 0;
-var eventList = {};
+var events = {};
 
 module.exports = {
+	events: events,
 	register: function(flags, params){
 		var eventId = registerId ++;
 
-		var event = eventList[eventId] = {
+		var event = events[eventId] = {
 			flags: flags || {},
 			params: params || {},
 			listeners: {}
@@ -22,7 +23,7 @@ module.exports = {
 		};
 	},
 	fire: function(eventId, eventName, params){
-		var event = eventList[eventId];
+		var event = events[eventId];
 
 		if(event && event.listeners[eventName]){
 			event.listeners[eventName].forEach(function(listener){
@@ -31,13 +32,13 @@ module.exports = {
 		}
 	},
 	getParams: function(eventId){
-		var event = eventList[eventId];
+		var event = events[eventId];
 		if(event){
 			return event.params;
 		}
 		return {};
 	},
 	destroy: function(eventId){
-		delete eventList[eventId];
+		delete events[eventId];
 	}
 };

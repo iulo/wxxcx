@@ -1,5 +1,5 @@
 var __dirname = "components";
-var api = require("./api.js")(__dirname);
+var api = require("../utils/api.js")(__dirname);
 
 var listeners = {};
 var globalData;
