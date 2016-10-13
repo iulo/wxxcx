@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-require("babel-polyfill");
 var program = require('commander'),
 	package = require("../package.json"),
-	config = require("../config.json"),
+	readJson = require("../utils/read-json"),
 	fs = require("fs"),
 	path = require("path");
+var config = readJson(path.join(__dirname, "../config.json"));
 
 var commandPath = "../command/{command}/index.js";
 function command(commandName){
-	var command = require(commandPath.replace("{command}", commandName)).default;
+	var command = require(commandPath.replace("{command}", commandName));
 	return function(){
 		command.apply(null, arguments);
 	};
@@ -18,11 +18,11 @@ function command(commandName){
 program
 	.version(package.version);
 
-// 项目配置
-program
-	.command("config <key> [value]")
-	.description("配置项目构建参数")
-	.action(command("config"));
+// // 项目配置
+// program
+// 	.command("config <key> [value]")
+// 	.description("配置项目构建参数")
+// 	.action(command("config"));
 
 // 
 program

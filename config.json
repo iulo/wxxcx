@@ -1,8 +1,12 @@
 {
 	"build": {
 		// 微信开发者工具注入文件
-		"inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/components/sidebar/sidebar.js",
+		//"inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/components/sidebar/sidebar.js",
 		// 微信开发者工具注入方法
-		"inject-function": "handleCompile"
+		//"inject-function": "handleCompile"
+		// 开发环境编译时注入文件
+		"build-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/webapp/commit/build.js",
+		// 发布、预览编译时注入文件
+		"publish-inject-file": "/Applications/wechatwebdevtools.app/Contents/Resources/app.nw/app/dist/webapp/trans/transManager.js"
 	}
 }

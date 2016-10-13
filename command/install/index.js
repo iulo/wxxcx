@@ -62,7 +62,7 @@ module.exports = function(){
 											path.get("value").replaceWithSourceString(
 												'function(){' +
 												'	var project = this.props.project;' +
-												'	exec("elong-xcx build", {' +
+												'	exec("wxxcx build", {' +
 												'		cwd: project.projectpath' +
 												'	}, function(error, stdout, stderr){' +
 												'		s.restart(Object.assign({}, project, {' +

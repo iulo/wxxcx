@@ -1,6 +1,7 @@
 var path = require("path");
 var babel = require("babel-core");
 var tempPlaceholder = require("./temp-placeholder");
+var babelPlugins = require("../../../utils/babelPlugins");
 
 module.exports = function(file, code, components){
 	// 当前页实例的组件列表
@@ -79,7 +80,7 @@ module.exports = function(file, code, components){
 					}
 				}
 			},
-			"syntax-jsx"
+			babelPlugins["syntax-jsx"]
 		]
 	}).code;
 

@@ -48,9 +48,7 @@ function copyFiles(entry, output, callback){
 }
 
 function build(){
-	//var projectRoot = fs.realpathSync(".").replace(/\/$/, "");
-	var projectRoot = "/Users/lifan/work-elong/wx/build-test";
-	//var projectRoot = "/Users/lifan/work-elong/wxxcxhotel";
+	var projectRoot = fs.realpathSync(".").replace(/\/$/, "");
 	var projectPath = path.dirname(projectRoot);
 	var projectName = projectRoot.replace(projectPath, "").replace(/^\//, "");
 	var output = path.join(projectPath, projectName + "-build");
@@ -104,7 +102,5 @@ function build(){
 		overwriteFn();
 	}
 };
-
-build();
 
 module.exports = build;

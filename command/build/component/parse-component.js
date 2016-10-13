@@ -1,4 +1,5 @@
 var babel = require("babel-core");
+var babelPlugins = require("../../../utils/babelPlugins");
 
 module.exports = function(code){
 	// 当前页引用的组件列表
@@ -53,7 +54,7 @@ module.exports = function(code){
 					}
 				}
 			},
-			"syntax-jsx"
+			babelPlugins["syntax-jsx"]
 		]
 	}).code;
 
