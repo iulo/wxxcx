@@ -28,6 +28,7 @@ toast("message");
 ```
 4、增强require功能
 支持相对于项目跟目录的绝对路径地址，省去../../...之类的麻烦
+
 5、增加globalData变化的监听
 可以监听globalData上某些字段的修改
 ```javascript
