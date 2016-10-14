@@ -1,5 +1,5 @@
 var __dirname = "#dirname#";
-var __overwrite = require("#overwrite#");
+var window = require("#window#");
 
 (function(#params#){
 	#api#

@@ -9,14 +9,16 @@ var mkdirs = require("../../../utils/mkdirs");
 
 var frameworkDir = "_f";
 
-// 检测是否已引用重写模块
+var windowRegex = new RegExp("(\"|')[^\\1]*\\b" + frameworkDir + "\\/overwrite\\.js\\1");
+// 检测是否已引用window模块
 function hasOverwrite(code){
-	return /("|')[^\1]*\butils\/overwrite\.js\1/.test(code);
+	return windowRegex.test(code);
 }
 
+var apiRegex = new RegExp("(\"|')[^\\1]*\\b" + frameworkDir + "\\/api\\.js\\1");
 // 检测是否已引入API模块
 function hasRequireApi(code){
-	return /("|')[^\1]*\butils\/api\.js\1/.test(code);
+	return apiRegex.test(code);
 }
 // 检测是否有使用api
 function hasUseApi(code){
@@ -36,6 +38,33 @@ function hasRequire(code){
 // 检测页面是否使用Page方法
 function hasPage(code){
 	return /\bPage\s*\(/.test(code.replace(/\.\s*Page\b/g, ""));
+}
+
+function findGlobal(code){
+	var globals = [];
+	babel.transform(code, {
+		plugins: [
+			function (_ref) {
+				var t = _ref.types;
+				return {
+					visitor: {
+						Identifier: function(path){
+							var node = path.node,
+								name = node.name;
+							if(globals.indexOf(name) !== -1){
+								return;
+							}
+							
+							if(path.parentPath.node.type === "AssignmentExpression" &&
+								path.scope.hasBinding(name)){
+								globals.push(name);
+							}
+						}
+					}
+				}
+			}
+		]
+	});
 }
 
 // 获取count个TAB键
@@ -67,12 +96,12 @@ module.exports = function(file, entry, output, callback){
 
 		if(hasRequire(clearCode) || api){
 			params.push("require");
-			arguments.push("__overwrite.require(require, __dirname)");
+			arguments.push("window.require(require, __dirname)");
 		}
 
 		if(hasPage(clearCode)){
 			params.push("Page");
-			arguments.push("__overwrite.Page");
+			arguments.push("window.Page");
 		}
 
 		var dirname = path.dirname(file).replace(entry, "").replace(/^\/+/, "");
@@ -80,7 +109,7 @@ module.exports = function(file, entry, output, callback){
 		if(params.length){
 			code = tpl(overwriteTpl, {
 				"dirname": dirname,
-				"overwrite": (dirname ? dirname.split("/").map(function(){return ".."}).join("/") : ".") + "/" + frameworkDir + "/overwrite.js",
+				"window": (dirname ? dirname.split("/").map(function(){return ".."}).join("/") : ".") + "/" + frameworkDir + "/window.js",
 				"params": params.join(","),
 				"arguments": arguments.join(","),
 				"api": api,
