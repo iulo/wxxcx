@@ -9,7 +9,7 @@ var mkdirs = require("../../../utils/mkdirs");
 
 var frameworkDir = "_f";
 
-var windowRegex = new RegExp("(\"|')[^\\1]*\\b" + frameworkDir + "\\/overwrite\\.js\\1");
+var windowRegex = new RegExp("(\"|')[^\\1]*\\b" + frameworkDir + "\\/window\\.js\\1");
 // 检测是否已引用window模块
 function hasWindow(code){
 	return windowRegex.test(code);
@@ -24,13 +24,17 @@ function hasRequireApi(code){
 function hasUseApi(code){
 	return /\bapi\s*\./.test(code.replace(/\.\s*api\b/g, ""));
 }
+// 检测是否有使用window
+function hasUseWindow(code){
+	return /\bwindow\s*\./.test(code.replace(/\.\s*window\b/g, ""));
+}
 
 // 移除字符串、注释、正则表达式等干扰
 function clearInterfere(code){
 	return code.replace(/"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^/\r\n])+\/(?=[^\/])|\/\/.*/g, "");
 }
 
-var defaultGlobals = ["wx", "App", "getApp", "module", "exports", "console"];
+var defaultGlobals = ["wx", "App", "getApp", "module", "exports", "window", "console"];
 function findGlobal(code){
 	var globals = [];
 	babel.transform(code, {
@@ -110,7 +114,7 @@ module.exports = function(file, entry, output, callback){
 
 		var dirname = path.dirname(file).replace(entry, "").replace(/^\/+/, "");
 
-		if(params.length){
+		if(params.length || api || hasUseWindow(clearCode)){
 			code = tpl(overwriteTpl, {
 				"dirname": dirname,
 				"window": (dirname ? dirname.split("/").map(function(){return ".."}).join("/") : ".") + "/" + frameworkDir + "/window.js",
