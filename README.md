@@ -31,11 +31,14 @@ newPage.on("aaa", function(data){
     ...
 </view>
 ```
-#### 3、增加全局通用组件机制
-提供开发全局组件功能，使用时业务代码无需修改任何文件，可直接在js中调用
+#### 3、增加window对象
+在window对象上添加的属性、方法，可以全局直接调用，以此可以创建全局性通用组件
 ```javascript
+window.alert = function(message){
+    console.log(message);
+};
+
 alert("message");
-toast("message");
 ...
 ```
 #### 4、增强require功能
@@ -45,9 +48,9 @@ var tool = require("lib/tool");
 ```
 
 #### 5、增加globalData变化的监听
-可以监听globalData上某些字段的修改
+Page中可以监听globalData上某些字段的修改
 ```javascript
-globalData.on(["a", "b"], function(){
+this.globalData.on(["a", "b"], function(){
     ...
 })
 ```
