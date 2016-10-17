@@ -276,64 +276,8 @@ var overwrite = {
 			PageEvents.fire(this._eventId, eventName, params);
 		};
 
-		// 基础组件数据容器
-		config.data.__baseComponent__ = {};
-
-		// alert组件
-		config.data.__baseComponent__.alert = {
-			title: "",
-			content: "",
-			confirmText: "确定",
-			cancelText: "取消",
-			hidden: true,
-			noCancel: true,
-			bindconfirm: "__alert_confirm_handler__",
-			bindcancel: "__alert_cancel_handler__"
-		};
-		config.__alert_confirm_handler__ = function(){
-			this.setData({
-				"__baseComponent__.alert.hidden": true
-			});
-		}
-		config.__alert_cancel_handler__ = function(){
-			this.setData({
-				"__baseComponent__.alert.hidden": true
-			});
-		}
-
 		Page(config);
-	},
-	alert: function(config){
-		var changeData = {
-			"__baseComponent__.alert.hidden": false
-		};
-
-		if(typeof config === "string"){
-			changeData["__baseComponent__.alert.content"] = config;
-		}else{
-			var canConfigKeys = ["title", "content", "confirmText", "cancelText", "noCancel"];
-			for(var key in config){
-				if(canConfigKeys.indexOf(key) !== -1){
-					changeData["__baseComponent__.alert." + key] = config[key];
-				}
-			}
-		}
-
-		getApp().getCurrentPage().setData(changeData);
 	}
 };
 
 module.exports = overwrite;
-
-// 设置全局Alert
-// Function.constructor.__proto__._apply = Function.constructor.__proto__.apply;
-// Function.constructor.__proto__.apply = function(target, params){
-// 	if(params[1] === "console.warn('can not create Function')"){
-// 		return this._apply(target, [params[0]]);
-// 	}else{
-// 		return this._apply(target, params);
-// 	}
-// };
-
-// var window = new Function("return this", "")();
-// window.Alert = overwrite.Alert = overwrite.alert;

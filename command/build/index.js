@@ -49,6 +49,8 @@ function copyFiles(entry, output, callback){
 
 function build(){
 	var projectRoot = fs.realpathSync(".").replace(/\/$/, "");
+	console.log(projectRoot);
+	projectRoot = "/Users/lifan/work-elong/wx/build-test";
 	var projectPath = path.dirname(projectRoot);
 	var projectName = projectRoot.replace(projectPath, "").replace(/^\//, "");
 	var output = path.join(projectPath, projectName + "-build");

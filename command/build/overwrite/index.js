@@ -11,7 +11,7 @@ var frameworkDir = "_f";
 
 var windowRegex = new RegExp("(\"|')[^\\1]*\\b" + frameworkDir + "\\/overwrite\\.js\\1");
 // 检测是否已引用window模块
-function hasOverwrite(code){
+function hasWindow(code){
 	return windowRegex.test(code);
 }
 
@@ -30,16 +30,7 @@ function clearInterfere(code){
 	return code.replace(/"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\/\*[\S\s]*?\*\/|\/(?:\\\/|[^/\r\n])+\/(?=[^\/])|\/\/.*/g, "");
 }
 
-// 检测页面是否使用require方法
-function hasRequire(code){
-	return /\brequire\s*\(/.test(code.replace(/\.\s*require\b/g, ""));
-}
-
-// 检测页面是否使用Page方法
-function hasPage(code){
-	return /\bPage\s*\(/.test(code.replace(/\.\s*Page\b/g, ""));
-}
-
+var defaultGlobals = ["wx", "App", "getApp", "module", "exports", "console"];
 function findGlobal(code){
 	var globals = [];
 	babel.transform(code, {
@@ -51,12 +42,25 @@ function findGlobal(code){
 						Identifier: function(path){
 							var node = path.node,
 								name = node.name;
-							if(globals.indexOf(name) !== -1){
+							if(globals.indexOf(name) !== -1 || defaultGlobals.indexOf(name) !== -1){
 								return;
 							}
-							
-							if(path.parentPath.node.type === "AssignmentExpression" &&
-								path.scope.hasBinding(name)){
+
+							var parentNode = path.parentPath.node;
+
+							if((parentNode.type === "AssignmentExpression" ||
+								parentNode.type === "MemberExpression" && node === parentNode.object ||
+								parentNode.type === "CallExpression" ||
+								parentNode.type === "UnaryExpression" ||
+								parentNode.type === "BinaryExpression" ||
+								parentNode.type === "LogicalExpression" ||
+								parentNode.type === "ConditionalExpression" ||
+								parentNode.type === "IfStatement" ||
+								parentNode.type === "WhileStatement" ||
+								parentNode.type === "ArrayExpression" ||
+								parentNode.type === "ExpressionStatement" ||
+								parentNode.type === "ObjectProperty" && node === parentNode.value) &&
+								!path.scope.hasBinding(name)){
 								globals.push(name);
 							}
 						}
@@ -65,6 +69,7 @@ function findGlobal(code){
 			}
 		]
 	});
+	return globals;
 }
 
 // 获取count个TAB键
@@ -80,29 +85,28 @@ module.exports = function(file, entry, output, callback){
 			throw err;
 		}
 
-		if(hasOverwrite(code)){
+		if(hasWindow(code)){
 			callback();
 			return;
 		}
 
 		var clearCode = clearInterfere(code);
 		var params = [],
-			arguments = [],
+			args = [],
 			api = "";
 
 		if(hasUseApi(clearCode) && !hasRequireApi(code)){
 			api = 'var api = require("' + frameworkDir + '/api")(__dirname);';
 		}
 
-		if(hasRequire(clearCode) || api){
-			params.push("require");
-			arguments.push("window.require(require, __dirname)");
-		}
-
-		if(hasPage(clearCode)){
-			params.push("Page");
-			arguments.push("window.Page");
-		}
+		findGlobal(code).forEach(function(key){
+			params.push(key);
+			if(key === "require"){
+				args.push("window.require(require, __dirname)");
+			}else{
+				args.push("window." + key);
+			}
+		});
 
 		var dirname = path.dirname(file).replace(entry, "").replace(/^\/+/, "");
 
@@ -111,7 +115,7 @@ module.exports = function(file, entry, output, callback){
 				"dirname": dirname,
 				"window": (dirname ? dirname.split("/").map(function(){return ".."}).join("/") : ".") + "/" + frameworkDir + "/window.js",
 				"params": params.join(","),
-				"arguments": arguments.join(","),
+				"arguments": args.join(","),
 				"api": api,
 				"content": code.replace(/^(\s*\n)+/g, "").split("\n").join("\n" + getTab(1))
 			});
